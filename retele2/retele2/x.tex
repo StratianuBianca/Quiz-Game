@@ -1,0 +1,267 @@
+\documentclass[11pt,leqno, runningheads]{llncs}
+\usepackage[noend]{algorithmic}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathrsfs}
+\usepackage{xcolor}
+\usepackage{biblatex}
+%\usepackage{yhmath}
+%\usepackage{amsthm}
+\usepackage{mathrsfs}
+\usepackage{hyperref}
+\usepackage{comment}
+\usepackage{graphics}
+\usepackage{graphicx}
+%\usepackage{kpfonts}
+
+\textwidth              16 cm
+\textheight             24.5  cm
+\oddsidemargin          -1   cm
+\evensidemargin         -1cm
+\topmargin              -1 cm
+\setlength{\evensidemargin}{15.5pt}
+\setlength{\oddsidemargin}{2.5pt}
+
+\newtheorem{Pro}{Propozi\c tia}
+\newtheorem{Teo}{Teorema}
+\newtheorem{Def}{Defini\c tia}
+\newtheorem{Lem}{Lema}
+\newtheorem{Cor}{Corolar}
+\newtheorem{Dem}{demonstra\c tie}
+\newtheorem{Rem}{Remarc\u a}
+\newtheorem{Exe}{Exemplul}
+\newtheorem{Obs}{Observa\c tie}
+\newtheorem{Obsi}{Observa\c tii}
+\newcommand{\inv}[2]{\mbox{}^{#1}#2}
+\newcommand{\inve}[2]{\mbox{}^{#1}#2}
+\newcommand\TS{\rule{0pt}{2.6ex}}
+\newcommand\BS{\rule[-1.2ex]{0pt}{0pt}}
+\newcommand*{\vvec}[1]{\vec{\mkern0mu#1}}
+
+
+
+
+\def\A{{\mathcal A}}
+\def\B{{\mathcal B}}
+\def\C{{\mathcal C}}
+
+\def\D{{\mathcal D}}
+\def\E{{\mathbb E}}
+\def\EE{{\mathcal E}}
+\def\F{{\mathcal F}}
+\let\g\gamma
+\def\G{{\mathcal G}}
+\def\H{{\mathcal H}}
+\def\L{{\mathcal L}}
+\def\II{{\mathfrak I}}
+\def\N{{\mathcal N}}
+\def\M{{\mathcal M}}
+\def\OO{{\mathcal O}}
+\def\P{{\mathcal P}}
+\def\S{{\mathcal S}}
+\def\Y{{\mathcal Y}}
+\let\O\Omega
+\let\o\omega
+\def\PP{{\mathbb P}}
+\def\Q{{\mathbb Q}}
+\def\QQ{{\mathcal Q}}
+\def\R{{\mathbb R}}
+\def\Z{{\mathbb Z}}
+\def\NN{{\mathbb N}}
+
+
+\usepackage{graphics}
+\pagestyle{empty}
+
+\begin{document}
+
+\centerline{\bf \Large Quizz Game }
+
+\vspace{0.5cm}
+
+\centerline{{\large Str\u atianu Bianca-Ionela, grupa A6, anul II }}
+
+\vspace{1cm}
+
+\section{Introducere}
+\hspace{1 cm} Acest raport prezint\u a detalii despre realizarea jocului Quizz Game in limbajul C++.
+
+Aceasta este o aplica\c tie client-server \^{i}n care clien\c tii r\u aspund unor \^{i}ntreb\u ari. Ace\c stia se autentific\u a cu un nume, iar pe urm\u a se pot al\u atura unui joc deja existent(dac\u a au codul jocului) sau pot s\u a creeze un nou joc la care pot participa doar clien\c tii care au codul jocului.
+
+Clientul care a creat un joc nou poate decide dac\u a mai asteapt\u a al\c ti juc\u atori sau dac\u a \^{i}ncepe jocul. \^{I}n cazul \^{i}n care acesta decide s\u a p\u ar\u aseasc\u a jocul \^{i}nainte ca acesta s\u a \^{i}nceap\u a, jocul respectiv se anuleaz\u a. Iar \^{i}n cazul \^{i}n care acesta vrea s\u a p\u ar\u aseasc\u a jocul dup\u a ce a \^{i}nceput, acesta trebuie s\u a continue.  
+
+\^{I}ntreb\u arile sunt puse clien\c tilor \^{i}n ordinea \^{i}n care s-au al\u aturat \^{i}n joc. Clien\c tii au la dispozitie 20 de secunde pentru a alege r\u aspunsul corect din cele patru oferite la o intrebare, serverul verific\u a r\u aspunsul dat de client \c si re\c tine scorul joc\u atorilor, iar la final, anun\c t\u a trimite tuturor juc\u atorilor care au r\u amas \^{i}n joc clasamentul. Serverul suporta mai multi juc\u atori \c si desigur mai multe jocuri consecutive. 
+
+\^{I}ntreb\u arile \^{i}mpreun\u a cu r\u aspunsurile sunt stocate \^{i}ntr-o baz\u a de date SQLite. 
+
+\vspace{1cm}
+
+\section{Tehnologii utilizate}
+
+\hspace{1 cm}Pentru realizarea conexiunii client-server am utilizat modelul TCP\cite{1} concurent (multithreading), care permite posibilitatea conect\u arii mai multor clien\c ti la server. Am utilizat aceast\u a conexiune deoarece vreau s\u a am siguran\c ta \c si asigurarea transmiterii datelor \^{i}n ordin, pentru c\u a nu vreau ca un jucator s\u a r\u aspund\u a corect, iar r\u aspunsul s\u a nu ajung\u a la server.
+
+Serverul TCP va crea c\^{a}te un thread\cite{2} (fir de execu\c tie) pentru fiecare client care vrea s\u a se conecteze la el, asigur\^{a}nd astfel posibilitatea conect\u arii mai multor clien\c ti simultan. Acesta are rolul de a prelua datele de la clien\c ti, a le procesa si a le transmite \^{i}napoi clien\c tilor. 
+
+Pentru realizarea graficii am folosit biblioteca GTK+\cite{3} deoarece este o bibliotec\u a simpl\u a de utilizat, dar \c s i pentru c\u a con\c tinea toate lucrurile de care aveam nevoie. Am reu\c sit sa fac o interfa\c ta grafic\u a unde clientul poate iesi oricand vrea el, iar proprietarul jocului stabile\c ste set\u arile jocului.Iar pentru realizarea interfe\c tei am folosit aplica\c tia Glade \cite{4}.
+
+Clientul va stabili un port pentru conexiune. Va avea rolul de a prelua datele de la server \c si a le afi\c sa \^{i}n interfa\c ta grafic\u a, iar pe urm\u a preia datele introduse de utilizator si le transmite serverului. 
+
+Pentru stocarea \^{i}ntreb\u arilor am folosit o baz\u a de date SQLite\cite{5} deoarece este u\c sor de utilizat, ofer\u a u\c surin\c ta re\c tinerii datelelor, dar \c si actualizarea sau \c stergerea lor, fiind totodata stocate \^{i}n sigurant\u a. Astfel, actualiz\^{a}ndu-mi \c si cuno\c sitin\c tele de la cursul de Baze de date. 
+
+\^{I}n baza de date am stocat mai multe tabele, de unde vor fi preluate \^{i}ntreb\u arile \^{i}n func\c tie de alegerile juc\u atorului care creeaza acel joc.
+
+\^{I}n func\c tie de num\u arul \^{i}ntreb\u arii aceasta este citit\u a din baza de date \c si transmis\u a tuturor clien\c tilor care sunt in acel joc. 
+
+\vspace{1 cm}
+
+\section{Arhitectura aplica\c tiei }
+
+\hspace{1 cm}Am realizat conexiunea dintre server si client cu ajutorul protocolului TCP multi-threading care creeaz\u a c\^{a}te un fir de execu\c tie pentru fiecare client, put\^{a}nd servi clien\c tii \^{i}n mod concurent. Serverul preia informa\c tia de la client, o proceseaz\u a \c si o transmite \^{i}napoi clientului.
+
+Am construit o baz\u a de date \^{i}n care am pus \^{i}ntreb\u arile si r\u aspunsurilor pe care le voi transmite clientilor, dar \c si r\u aspunsul corect pentru a putea citi de la client r\u aspunsul \c si s\u a \^{i}l compar cu cel din baza de date, actualiz\^{a}nd punctajele clien\c tilor \^{i}n cazul \^{i}n care au r\u aspuns corect.
+
+Pentru a putea lega baza de date cu jocul, am instalat baza de date compatibil\u a cu versiunea mea Linux, am instalat librariile necesare in cadrul programului \c si am creat legatura dintre cele dou\u a. 
+
+
+
+\begin{figure}[!h]
+  \includegraphics[width=0.6\textwidth]{d.png}
+  \centering
+  \caption{}
+\end{figure}
+
+
+\begin{figure}[!h]
+  \includegraphics[width=1\textwidth]{dia.png}
+  \centering
+  \caption{Diagrama aplica\c tiei}
+\end{figure}
+
+\vspace{1 cm}
+\newpage
+\section{Detalii implementare}
+
+\hspace{1 cm}Pentru ca aplica\c tia s\u a func\c tioneze normal trebuie s\u a respecte diagrama de mai sus. 
+Func\c tia de autentificare are rolul a crea un cont clientului. Acesta decide dac\u a se alatur\u a unui joc deja existent (dac\u a \c stie codul jocului respectiv) sau dac\u a creeaz\u a un joc nou cu un cod secret.
+
+Clientul care a decis s\u a fac\u a un joc nou decide c\^{a}nd incepe jocul propriu-zis. Dac\u a aceste decide s\u a p\u ar\u aseasc\u a jocul \^{i}nainte s\u a \^{i}nceap\u a, jocul se termin\u a. \^{I}ns\u a dac\u a acesta sau oricare altul din acel joc decide s\u a p\u ar\u aseasc\u a jocul dup\u a ce a \^{i}nceput, ceilal\c ti clien\c ti pot continua s\u a r\u aspund\u a la \^{i}ntreb\u ari.
+
+\^{I}ntreb\u arile sunt puse clien\t ilor \^{i}n ordinea \^{i}n care s-au al\u aturat \^{i}n acel joc. Dup\u a ce un client a r\u aspuns la \^{i}ntrebarea pe care a primit-o sau dac\u a a trecut timpul, acesta merge \^{i}ntr-o camer\u a separat\u a unde a\c steapt\u a sa \^{i}i vin\u a r\^{a}ndul din nou. \^{I}n aceast\u a camer\u a el poate decide dac\u a p\u ar\u ase\c ste jocul.
+
+\^{I}n orice moment al jocului clientul poate p\u ar\u a si jocul, acest lucru nu afecteaz\u a ceilalti juc\u atori, fiind \c sters \c si din clasamentul final
+
+\begin{figure}[!h]
+  \includegraphics[width=0.9\textwidth]{usss.png}
+  \centering
+  \caption{Uses cases}
+\end{figure} 
+
+Clien\c tii dintr-un joc r\u aspund la \^{i}ntreb\u ari \^{i}n ordinea \^{i}n care ace\c stia s-au al\u aturat jocului. Ei r\u aspund la \^{i}ntreb\u ari, iar interog\^{a}nd din nou baza de date, verific\u am dac\u a r\u aspunsul este corect. Punctajul clientului fiind actualizat. Dac\u a a trecut timpul \c si acesta nu a r\u aspuns clasamentul r\u am\^{a}ne acela\c si, jocul se continu\u a cu urm\u atorul juc\u ator, 
+
+
+Dup\u a ce toate \^{i}ntreb\u arile din baza de date au fost parcurse, este calculat \c si trimis clasamentul tuturor clien\c tilor care au r\u amas \^{i}n joc.
+
+Un scenariu nefericit ar fi atunci când un client care care a\c steapt\u a s\u a \^{i}nceap\u a un joc, decide s\u a \^{i}l p\u ar\u aseasc\u a, dar pentru asta am o func\c tie care \^{i}l \c sterge pe acest juc\u ator din lista ju\c atorilor care de\c tin acel cod. 
+
+Un alt scenariu nefericit ar fi atunci când clientul care a creat jocul îl părăsește după ce a început, dar ceilalți jucători pot continua jocul deoarece doar statutul clientului inițial se schimbă, ceilalți clienți primind în continuare întrebări.
+
+Un scenariu fericit este atunci când clientul intră intr-un joc deja creat, proprietarul jocului decide când acesta începe jocul, fiecare client din acel joc primind întrebările în ordinea în care au venit în joc. 
+
+Un alt scenariu fericit este atunci când clientul creează un nou joc pentru care creeaza si o parola unică. El așteaptă clienții care au această parolă să se alature jocului, primind întrebări, iar la final fiind afișat clasamentul tuturor juc\u atorilor.
+
+\vspace{2 cm}
+\begin{figure}[!h]
+  \includegraphics[width=0.6\textwidth]{struct.png}
+  \centering
+  \caption{Structuri}
+\end{figure} 
+
+\^{I}n figura 1 avem:
+
+Prima structur\u a re\c tine pentru fiecare client detalii despre acesta cum ar fi: numele, dac\u a a creat un joc sau s-a alaturat unui joc, scorul acestuia, descriptorul, dar \c si timpul c\^{a}nd a primit o \^{i}ntrebare pentru a sti c\^{a}nd a trecut timpul s\u a putem trece la urm\u atorul client.
+
+Cea de a doua structur\u a re\c tine pentru fiecare joc nou creat, clien\c tii care sunt \^{i}n acel joc, num\u arul de juc\u atori, dar \c si num\u arul de \^{i}ntreb\u ari at\^{a}t puse c\^{a}t \c si num\u arul de \^{i}ntreb\u ari pe care le-a ales juc\u atorul care a creat jocul, pentru a \c sti cand s-a terminat acea sesiune.
+
+\begin{figure}[!h]
+  \includegraphics[width=0.6\textwidth]{bdd.png}
+  \centering
+  \caption{Fucntie care apeleaza baza de date}
+\end{figure} 
+
+Serverul extrage \^{i}ntrebarea din baza de date, dar \c si r\u aspunsul corect pentru a-l putea compara cu r\u aspunsul clientului.
+
+\begin{figure}[!h]
+  \includegraphics[width=0.6\textwidth]{init2.png}
+  \centering
+  \caption{Functia care ini\c tializeaz\u a to\c ti clien\c tii dup\u a ce jocul s-a terminat}
+\end{figure} 
+
+
+\begin{figure}[!h]
+  \includegraphics[width=0.6\textwidth]{urm.png}
+  \centering
+  \caption{Functia care trimite \^{i}ntrebarea urm\u atorului client}
+\end{figure} 
+
+
+\vspace{7cm}
+\hspace{3cm}
+
+\newpage
+\vspace{2 cm}
+
+\newpage
+
+\vspace{3cm}
+
+
+\section{Concluzii}
+
+\hspace{1 cm}Acest joc poate fi \^{i}mbun\u at\u a\c tit prin crearea unei baze de date \^{i}n care este memorat fiecare juc\u ator, iar acesta \^{i}\c si poate vedea clasamentul jocurile de p\^{a}n\u a acum, av\^{a}nd diagrame \^{i}n care este prezentat progresul sau regresul acestuia, dar \c si domeniile la care se pricepe cel mai bine, c\^{a}te r\u aspunsuri corecte, dar \c si gre\c site are.De asemenea, o alt\u a \^{i}mbun\u at\u a\c tire a solu\c tiei propuse ar putea fi faptul c\u a fiecare client sa aibe pentru fiecare joc un num\u ar de trei solu\c tii ajut\u atoare \c si anume: eliminarea a dou\u a variante de r\u aspuns, schimbarea \^{i}ntreb\u arii, dar si ar\u atarea statisticii r\u aspunsurile tuturor clien\c tilor care au primit aceast\u a \^{i}ntrebare.
+
+
+Aceast\u a aplica\v tie ar putea fi utilil\u a \^{i}n via\c ta reala\u a deoarece este un mod pl\u acut de petrecere a timpului liber, \^{i}nv\u a\c t\^{a}nd totodat\u a si lucruri noi din diverse domenii. 
+
+\section{Bibliografie}
+
+\begin{thebibliography}{100}
+\bibitem{}\url{https://profs.info.uaic.ro/~computernetworks/files/NetEx/S12/ServerConcThread/servTcpConcTh2.c}
+\bibitem{}\url{https://profs.info.uaic.ro/~computernetworks/files/7rc_ProgramareaInReteaIII_Ro.pdf}
+\bibitem{}\url{https://profs.info.uaic.ro/~computernetworks/files/5rc_ProgramareaInReteaI_ro.pdf}
+\bibitem{}\url{https://profs.info.uaic.ro/~computernetworks/files/NetEx/S12/ServerConcThread/cliTcpNr.c}
+\bibitem{}\url{https://profs.info.uaic.ro/~gcalancea/Laboratorul_9.pdf}
+\bibitem{}\url{https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clarification?fbclid=IwAR2b5kFpUOZx-0on6M7HLp9ALWPv_S4t5GkLMe6qSPcL9krn3fZv2Pi8EeM}
+\bibitem{}\url{https://www.geeksforgeeks.org/sql-using-c-c-and-sqlite/?fbclid=IwAR2ULns4il5r21LsOlLl69h6Ax7gaA4Yssz6NbKfQ_IY_ouWQqwaehDTe_I}
+\bibitem{}\url{https://www.youtube.com/watch?v=dFzJ4UPNL1w&fbclid=IwAR3oQu7bM6Kwmn4karP7B84BQ7u2QukVagrK2MfUM-lG9sE57yL9ZdV9HRI}
+\bibitem{}\url{https://sqlite.org/cli.html}
+\bibitem{}\url{https://www.linuxjournal.com/article/1363}
+\bibitem{}\url{https://www.youtube.com/watch?v=g-KDOH_uqPk}
+\bibitem{}\url{https://prognotes.net/gtk-glade-c-programming/}
+\bibitem{}\url{https://prognotes.net/2016/03/gtk-3-c-code-hello-world-tutorial-using-glade-3/}
+\bibitem{}\url{https://unix.stackexchange.com/questions/129355/what-is-difference-between-gtk-and-qt-applications}
+\bibitem{}\url{https://www.reddit.com/r/linuxmasterrace/comments/6ee9sy/gtk_vs_qt_what_do_you_prefer_and_why_2017_edition/}
+\bibitem{}\url{https://stackoverflow.com/questions/43078613/c-non-blocking-reading}
+
+
+
+Referin\c te
+
+
+
+\cite{1}\url{https://www.extrahop.com/resources/protocols/tcp/}
+
+
+\cite{2}\url{https://en.wikipedia.org/wiki/Thread_(computing)}
+
+\cite{3}\url{https://ro.wikipedia.org/wiki/GTK}
+
+
+\cite{4}\url{https://glade.gnome.org/}
+
+
+\cite{5}\url{https://www.sqlite.org/about.html}
+\end{thebibliography}
+
+
+\end{document}
